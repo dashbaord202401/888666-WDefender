@@ -22,11 +22,7 @@ contract testContract is ERC721URIStorage, Pausable {
     address public owner;
 
     /// @dev Emitted when an NFT is minted.
-    event NFTMinted(
-        address indexed receiver,
-        uint256 indexed tokenId,
-        uint256 indexed attributes
-    );
+    event NFTMinted(address indexed receiver, uint256 indexed tokenId, uint256 indexed attributes);
 
     /// @dev Emitted when excess value is transferred back to the sender after minting.
     event ExcessValueTransferred(
@@ -41,7 +37,7 @@ contract testContract is ERC721URIStorage, Pausable {
 
     /// @dev Sets the base price for tokenId between 1E3 and 2E3.
     /// @notice The base price for transactions in the contract, denominated in ether.
-    uint constant BASE_PRICE_2k = 0.0069 ether;
+    uint constant BASE_PRICE_2e3 = 0.0069 ether;
 
     mapping(uint256 => uint256) public tokenAttributes;
     mapping(string => bool) private _mintedURIs;
@@ -109,9 +105,7 @@ contract testContract is ERC721URIStorage, Pausable {
 
         // Pricing logic
         (tokenId < MINT_THRESHOLD_2k)
-            ? ((tokenId < MINT_THRESHOLD_2k / 2)
-                ? price = basePrice1e3
-                : price = BASE_PRICE_2k)
+            ? ((tokenId < MINT_THRESHOLD_2k / 2) ? price = basePrice1e3 : price = BASE_PRICE_2e3)
             : price = calculatePrices(attributes);
         (tokenId < MINT_THRESHOLD_2k) ? limit = 1 : limit = 7;
 
@@ -120,18 +114,12 @@ contract testContract is ERC721URIStorage, Pausable {
 
         // Mint limit enforcement
         if (balanceOf(to) == limit) {
-            revert MintLimitReached({
-                message: "Mint Limit Reached",
-                limitValue: limit
-            });
+            revert MintLimitReached({message: "Mint Limit Reached", limitValue: limit});
         }
 
         // Payment verification
         if (msg.value < price) {
-            revert InsufficientPayment({
-                message: "Insufficient payment for NFT",
-                required: price
-            });
+            revert InsufficientPayment({message: "Insufficient payment for NFT", required: price});
         }
 
         // Minting process
@@ -155,9 +143,7 @@ contract testContract is ERC721URIStorage, Pausable {
     /// @dev Internal function for price calculation.
     /// @param attributesCount The number of attributes of the NFT.
     /// @return The calculated price for the given number of attributes.
-    function calculatePrices(
-        uint256 attributesCount
-    ) internal view returns (uint256) {
+    function calculatePrices(uint256 attributesCount) internal view returns (uint256) {
         if (attributesCount == 0) {
             return zeroAttributeBasePrices;
         } else {
@@ -183,15 +169,13 @@ contract testContract is ERC721URIStorage, Pausable {
     /// @notice Retrieves the current base price for tokenIds between 1000 and 2000.
     /// @return The base price for the tokenIds between 1000 and 2000 in wei.
     function getBasePrice2e3() public pure returns (uint256) {
-        return BASE_PRICE_2k;
+        return BASE_PRICE_2e3;
     }
 
     /// @notice Updates the base price for NFTs with attributes.
     /// @dev Callable only by the contract owner.
     /// @param basePriceAttribute The new base price for NFTs with attributes in wei.
-    function updateBasePriceAttributes(
-        uint256 basePriceAttribute
-    ) external onlyOwner {
+    function updateBasePriceAttributes(uint256 basePriceAttribute) external onlyOwner {
         basePrices = basePriceAttribute;
     }
 
@@ -204,9 +188,7 @@ contract testContract is ERC721URIStorage, Pausable {
     /// @notice Updates the base price for NFTs with zero attributes.
     /// @dev Callable only by the contract owner.
     /// @param basePriceZeroAttribute The new base price for NFTs with zero attributes in wei.
-    function updateBasePriceZeroAttributes(
-        uint256 basePriceZeroAttribute
-    ) external onlyOwner {
+    function updateBasePriceZeroAttributes(uint256 basePriceZeroAttribute) external onlyOwner {
         zeroAttributeBasePrices = basePriceZeroAttribute;
     }
 
@@ -226,9 +208,7 @@ contract testContract is ERC721URIStorage, Pausable {
     /// @notice Updates the address to receive mint fees.
     /// @dev Callable only by the contract owner.
     /// @param mintAmountReceiver The address to receive minting fees.
-    function updateMintAmountReceiver(
-        address mintAmountReceiver
-    ) external onlyOwner {
+    function updateMintAmountReceiver(address mintAmountReceiver) external onlyOwner {
         require(mintAmountReceiver != address(0), "Invalid address");
         mintEthReceiver = mintAmountReceiver;
     }
